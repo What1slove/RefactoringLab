@@ -635,12 +635,10 @@ public class Board extends JPanel implements ActionListener {
 				continue;
 			}
 			ex.move(B_WIDTH, crawler.getColumn());
-			if (ex.getZ() <= 0) {
-				if (ex.isPod()) {
-					// we're at the top of the board; split the pod
-					exes.add(ex.spawn());
-					ex.setPod(false);
-				}
+			if (ex.getZ() <= 0 && ex.isPod()) {
+				// we're at the top of the board; split the pod
+				exes.add(ex.spawn());
+				ex.setPod(false);
 			}
 			if ((ex.getZ() < LEVEL_DEPTH)
 					&& (r.nextInt(10000) < levelinfo.getExFireBPS()))
@@ -653,15 +651,13 @@ public class Board extends JPanel implements ActionListener {
 
 	private void updateSpikes() {
 		for (Spike s : spikes) {
-			if (s.isVisible()) {
-				if (s.isSpinnerVisible()) {
-					s.move();
-					if ((s.getSpinnerZ() < LEVEL_DEPTH)
-							&& (r.nextInt(10000) < levelinfo.getExFireBPS()/4))
-					{ // with 1/4 the frequency of an ex, this spinner fires a missile
-						enemymissiles.add(new Missile(s.getColumn(), s.getSpinnerZ(), false));
-						SoundManager.get().play(Sound.ENEMYFIRE);
-					}
+			if (s.isVisible() && s.isSpinnerVisible()) {
+				s.move();
+				if ((s.getSpinnerZ() < LEVEL_DEPTH)
+						&& (r.nextInt(10000) < levelinfo.getExFireBPS()/4))
+				{ // with 1/4 the frequency of an ex, this spinner fires a missile
+					enemymissiles.add(new Missile(s.getColumn(), s.getSpinnerZ(), false));
+					SoundManager.get().play(Sound.ENEMYFIRE);
 				}
 			}
 		}
