@@ -56,13 +56,15 @@ public class Missile {
 	public GameObjectCoordsMap getCoords(Level lev){
 		GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(5);
 		ArrayList<Coord> coords = coordsMap.coords;
-		Column c = lev.getColumns().get(colnum);
-		int[] p1 = c.getFrontPoint1();
-		int[] p2 = c.getFrontPoint2();
-		coords.get(0).setXYZ(p1[0]+(p2[0] - p1[0])*2/5,p1[1]+(p2[1] - p1[1])*2/5,zpos-HEIGHT_H);
-		coords.get(1).setXYZ(p1[0]+(p2[0] - p1[0])/2,p1[1]+(p2[1] - p1[1])/2,zpos-HEIGHT);
-		coords.get(2).setXYZ(p1[0]+(p2[0] - p1[0])*3/5,p1[1]+(p2[1] - p1[1])*3/5,zpos-HEIGHT_H);
-		coords.get(3).setXYZ(p1[0]+(p2[0] - p1[0])/2,p1[1]+(p2[1] - p1[1])/2,zpos);
+		Column column = lev.getColumns().get(colnum);
+		int p1x=column.getFirstPointX();
+		int p1y=column.getFirstPointY();
+		int p2x=column.getSecondPointX();
+		int p2y=column.getSecondPointY();
+		coords.get(0).setXYZ(p1x+(p2x - p1x)*2/5,p1y+(p2y - p1y)*2/5,zpos-HEIGHT_H);
+		coords.get(1).setXYZ(p1x+(p2x - p1x)/2,p1y+(p2y - p1y)/2,zpos-HEIGHT);
+		coords.get(2).setXYZ(p1x+(p2x - p1x)*3/5,p1y+(p2y - p1y)*3/5,zpos-HEIGHT_H);
+		coords.get(3).setXYZ(p1x+(p2x - p1x)/2,p1y+(p2y - p1y)/2,zpos);
 		coords.get(4).setXYZ(coords.get(0));
 		coordsMap.coords=coords;
 		return coordsMap;
@@ -77,13 +79,15 @@ public class Missile {
 	public GameObjectCoordsMap getLayerCoords(Level lev){
 		GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(5);
 		ArrayList<Coord> coords = coordsMap.coords;
-		Column c = lev.getColumns().get(colnum);
-		int[] p1 = c.getFrontPoint1();
-		int[] p2 = c.getFrontPoint2();
-		coords.get(0).setXYZ(p1[0]+(p2[0] - p1[0])*9/20,p1[1]+(p2[1] - p1[1])*9/20,zpos-HEIGHT_H);
-		coords.get(1).setXYZ(p1[0]+(p2[0] - p1[0])/2,p1[1]+(p2[1] - p1[1])/2,zpos-HEIGHT*3/5);
-		coords.get(2).setXYZ(p1[0]+(p2[0] - p1[0])*11/20,p1[1]+(p2[1] - p1[1])*11/20,zpos-HEIGHT_H);
-		coords.get(3).setXYZ(p1[0]+(p2[0] - p1[0])/2,p1[1]+(p2[1] - p1[1])/2,zpos-HEIGHT*2/5);
+		Column column = lev.getColumns().get(colnum);
+		int p1x=column.getFirstPointX();
+		int p1y=column.getFirstPointY();
+		int p2x=column.getSecondPointX();
+		int p2y=column.getSecondPointY();
+		coords.get(0).setXYZ(p1x+(p2x - p1x)*9/20,p1y+(p2y - p1y)*9/20,zpos-HEIGHT_H);
+		coords.get(1).setXYZ(p1x+(p2x - p1x)/2,p1y+(p2y - p1y)/2,zpos-HEIGHT*3/5);
+		coords.get(2).setXYZ(p1x+(p2x - p1x)*11/20,p1y+(p2y - p1y)*11/20,zpos-HEIGHT_H);
+		coords.get(3).setXYZ(p1x+(p2x - p1x)/2,p1y+(p2y - p1y)/2,zpos-HEIGHT*2/5);
 		coords.get(4).setXYZ(coords.get(0));
 		coordsMap.coords=coords;
 		return coordsMap;

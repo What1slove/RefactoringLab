@@ -273,8 +273,8 @@ public class Level {
 		for (int i=0; i<columns.size(); i++){
 			Column col = columns.get(i);
 			if (i==0)
-				coordList.add(col.getFrontPoint1());
-			coordList.add(col.getFrontPoint2());
+				coordList.add(col.getFirstPoint());
+			coordList.add(col.getSecondPoint());
 		}
 		return coordList;
 	}

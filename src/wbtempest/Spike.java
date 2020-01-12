@@ -91,13 +91,15 @@ public class Spike {
 		int nCoords = 16;
 		GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(nCoords);
 		ArrayList<Coord> coords = coordsMap.coords;
-		Column c = lev.getColumns().get(colnum);
-		int[] p1 = c.getFrontPoint1();
-		int[] p2 = c.getFrontPoint2();
+		Column column = lev.getColumns().get(colnum);
+		int p1x=column.getFirstPointX();
+		int p1y=column.getFirstPointY();
+		int p2x=column.getSecondPointX();
+		int p2y=column.getSecondPointY();
 		int[] mp = new int[2];
-		mp[0] = p1[0] + (p2[0]-p1[0])/2;
-		mp[1] = p1[1] + (p2[1]-p1[1])/2;
-		int colWidth = (int)Math.sqrt(Math.pow((p2[0]-p1[0]),2) + Math.pow((p2[1]-p1[1]),2));
+		mp[0] = p1x + (p2x-p1x)/2;
+		mp[1] = p1y + (p2y-p1y)/2;
+		int colWidth = (int)Math.sqrt(Math.pow((p2x-p1x),2) + Math.pow((p2y-p1y),2));
 		int origRadius = colWidth/3;
 		int radius = origRadius;
 		float rad_dist = (float) (3.1415927 * 2)*3;
@@ -115,10 +117,12 @@ public class Spike {
 	public GameObjectCoordsMap getCoords(Level lev){
 		GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(2);
 		ArrayList<Coord> coords = coordsMap.coords;
-		Column c = lev.getColumns().get(colnum);
-		int[] p1 = c.getFrontPoint1();
-		int[] p2 = c.getFrontPoint2();
-		coords.get(0).setXYZ(p1[0] + (p2[0] - p1[0])/2,p1[1] + (p2[1] - p1[1])/2,Board.LEVEL_DEPTH);
+		Column column = lev.getColumns().get(colnum);
+		int p1x=column.getFirstPointX();
+		int p1y=column.getFirstPointY();
+		int p2x=column.getSecondPointX();
+		int p2y=column.getSecondPointY();
+		coords.get(0).setXYZ(p1x + (p2x - p1x)/2,p1y + (p2y - p1y)/2,Board.LEVEL_DEPTH);
 		coords.get(1).setXYZ(coords.get(0));
 		coords.get(1).setZ(Board.LEVEL_DEPTH - length);
 		coordsMap.coords=coords;

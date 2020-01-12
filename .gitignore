@@ -1,6 +1,6 @@
 /bin/
 /build
-/.idea
 *.class
 wbt.hi
 wbtempest.jar
+/.idea/

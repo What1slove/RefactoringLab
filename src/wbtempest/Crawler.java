@@ -1,6 +1,6 @@
 package wbtempest;
 
-import java.awt.Image;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,36 +92,38 @@ public class Crawler {
         GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(9);
         ArrayList<Coord> coords = coordsMap.coords;
         Column column = lev.getColumns().get(colnum);
-        int[] pt1 = column.getFrontPoint1();
-        int[] pt2 = column.getFrontPoint2();
+        int p1x=column.getFirstPointX();
+        int p1y=column.getFirstPointY();
+        int p2x=column.getSecondPointX();
+        int p2y=column.getSecondPointY();
         switch (pose)
         {
         	case 0:{
-                coords.get(0).setXYZ(pt1[0] +(pt2[0] - pt1[0])/3 ,pt1[1] +(pt2[1] - pt1[1])/3,CHEIGHT_H);
-                coords.get(2).setXYZ(pt1[0] +(pt2[0] - pt1[0])/4 ,pt1[1] +(pt2[1] - pt1[1])/4,-CHEIGHT);
-                coords.get(4).setXYZ(pt2[0] -(pt2[0] - pt1[0])/4 ,pt2[1] -(pt2[1] - pt1[1])/4,CHEIGHT_HP);
-                coords.get(6).setXYZ(pt1[0] +(pt2[0] - pt1[0])/4 ,pt1[1] +(pt2[1] - pt1[1])/4,-CHEIGHT_H);
+                coords.get(0).setXYZ(p1x +(p2x - p1x)/3 ,p1y +(p2y - p1y)/3,CHEIGHT_H);
+                coords.get(2).setXYZ(p1x +(p2x - p1x)/4 ,p1y +(p2y - p1y)/4,-CHEIGHT);
+                coords.get(4).setXYZ(p2x -(p2x - p1x)/4 ,p2y -(p2y - p1y)/4,CHEIGHT_HP);
+                coords.get(6).setXYZ(p1x +(p2x - p1x)/4 ,p1y +(p2y - p1y)/4,-CHEIGHT_H);
                 break;
         	}
         	case 1: {
-                coords.get(0).setXYZ(pt1[0] +(pt2[0] - pt1[0])/3 ,pt1[1] +(pt2[1] - pt1[1])/3,CHEIGHT_H);
-                coords.get(2).setXYZ(pt1[0] +(pt2[0] - pt1[0])/2 ,pt1[1] +(pt2[1] - pt1[1])/2,-CHEIGHT);
-                coords.get(4).setXYZ(pt2[0] -(pt2[0] - pt1[0])/3,pt2[1] -(pt2[1] - pt1[1])/3,CHEIGHT_H);
-                coords.get(6).setXYZ(pt1[0] +(pt2[0] - pt1[0])/2 ,pt1[1] +(pt2[1] - pt1[1])/2,-CHEIGHT_H);
+                coords.get(0).setXYZ(p1x +(p2x - p1x)/3 ,p1y +(p2y - p1y)/3,CHEIGHT_H);
+                coords.get(2).setXYZ(p1x +(p2x - p1x)/2 ,p1y +(p2y - p1y)/2,-CHEIGHT);
+                coords.get(4).setXYZ(p2x -(p2x - p1x)/3,p2y -(p2y - p1y)/3,CHEIGHT_H);
+                coords.get(6).setXYZ(p1x +(p2x - p1x)/2 ,p1y +(p2y - p1y)/2,-CHEIGHT_H);
                 break;
         	}
         	case 2: {
-                coords.get(0).setXYZ(pt1[0] +(pt2[0] - pt1[0])/4 ,pt1[1] +(pt2[1] - pt1[1])/4,CHEIGHT_HP);
-                coords.get(2).setXYZ(pt1[0] +(pt2[0] - pt1[0])*3/4 ,pt1[1] +(pt2[1] - pt1[1])*3/4,-CHEIGHT);
-                coords.get(4).setXYZ(pt2[0] -(pt2[0] - pt1[0])/3,pt2[1] -(pt2[1] - pt1[1])/3,CHEIGHT_H);
-                coords.get(6).setXYZ(pt1[0] +(pt2[0] - pt1[0])*3/4 ,pt1[1] +(pt2[1] - pt1[1])*2/3,-CHEIGHT_H);
+                coords.get(0).setXYZ(p1x +(p2x - p1x)/4 ,p1y +(p2y - p1y)/4,CHEIGHT_HP);
+                coords.get(2).setXYZ(p1x +(p2x - p1x)*3/4 ,p1y +(p2y - p1y)*3/4,-CHEIGHT);
+                coords.get(4).setXYZ(p2x -(p2x - p1x)/3,p2y -(p2y - p1y)/3,CHEIGHT_H);
+                coords.get(6).setXYZ(p1x +(p2x - p1x)*3/4 ,p1y +(p2y - p1y)*2/3,-CHEIGHT_H);
                 break;
         	}
         }
-        coords.get(1).setXYZ(pt1[0] ,pt1[1],0);
-        coords.get(3).setXYZ(pt2[0] ,pt2[1],0);
-        coords.get(5).setXYZ(pt2[0] -(pt2[0] - pt1[0])/6 ,pt2[1] -(pt2[1] - pt1[1])/6,0);
-        coords.get(7).setXYZ(pt1[0] +(pt2[0] - pt1[0])/6 ,pt1[1] +(pt2[1] - pt1[1])/6,0);
+        coords.get(1).setXYZ(p1x ,p1y,0);
+        coords.get(3).setXYZ(p2x ,p2y,0);
+        coords.get(5).setXYZ(p2x -(p2x - p1x)/6 ,p2y -(p2y - p1y)/6,0);
+        coords.get(7).setXYZ(p1x +(p2x - p1x)/6 ,p1y +(p2y - p1y)/6,0);
         coords.get(8).setXYZ(coords.get(0));
         coordsMap.coords=coords;
         return coordsMap;
