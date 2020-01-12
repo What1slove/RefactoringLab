@@ -1,8 +1,8 @@
 package wbtempest;
 
+import wbtempest.Levels.Level;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * A missile.  If being fired down into the level, it represents a player missile;

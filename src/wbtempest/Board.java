@@ -1,28 +1,22 @@
 package wbtempest;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
-import java.awt.Toolkit;
+
+import wbtempest.Levels.Level;
+import wbtempest.Levels.LevelFactory;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-
-import javax.swing.JPanel;
-import javax.swing.Timer;
-
-import java.util.*;
 
 /**
  * Main object, handles board, layout, update loop, and repainting.
@@ -49,6 +43,7 @@ public class Board extends JPanel implements ActionListener {
 
 	private Timer timer;
     private Crawler crawler;
+    private LevelFactory levelFactory;
     private ArrayList<Ex> exes;
     private ArrayList<Missile> enemymissiles;
     private ArrayList<Spike> spikes;
@@ -91,6 +86,7 @@ public class Board extends JPanel implements ActionListener {
 			stdfnt = new Font("Helvetica", Font.BOLD, 50);
 		}
 
+		levelFactory = new LevelFactory();
 		exes = new ArrayList<Ex>();
 		enemymissiles = new ArrayList<Missile>();
 		spikes = new ArrayList<Spike>();
@@ -147,7 +143,7 @@ public class Board extends JPanel implements ActionListener {
      * initialize a level for play
      */
     private void initLevel(){
-    	levelinfo = new Level (levelnum, B_WIDTH, B_HEIGHT);
+    	levelinfo= levelFactory.createLevel(levelnum, B_WIDTH, B_HEIGHT);
         crawler = new Crawler(levelinfo);
         exes.clear();
         int ncols = levelinfo.getColumns().size();
