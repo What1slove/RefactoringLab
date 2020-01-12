@@ -3,11 +3,11 @@ wbt
 
 "wannabe tempest"
 
-a tempest (80's arcade game) clone in java, and a small project for playing with git.
+a tempest (80's arcade board) clone in java, and a small project for playing with git.
 
 playable, and fairly true to the original, though not a full feature-complete clone.
 
-<strong>game summary</strong> for those not familiar with tempest:<br/>
+<strong>board summary</strong> for those not familiar with tempest:<br/>
 the player (you) has a crawler, with which you must maneuver around the front of the current level and destroy the enemies coming forward towards you, out of the center of the screen.  the enemies are:<br/>
 <ul>
 <li>exes: x-shaped enemies that fire missiles at you, and will chase you around the front of the board until they catch and kill you, if not destroyed.  to kill an ex, hit it with a missile, or fire a missile while it is adjacent to you.</li><br/>

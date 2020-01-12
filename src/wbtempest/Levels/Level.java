@@ -41,7 +41,7 @@ public abstract class Level {
 		else spikespct = (float) 1;
 		columns = new ArrayList<Column>();
 	}
-	
+
 	public List<Column> getColumns(){
 		return columns;
 	}

@@ -29,7 +29,7 @@ public class Spike {
 
 	public Spike(int colnum) {
 		this.colnum = colnum;
-		length = r.nextInt(Board.LEVEL_DEPTH*3/4)+Board.LEVEL_DEPTH/10;
+		length = r.nextInt(Board.LEVEL_DEPTH*3/4)+ Board.LEVEL_DEPTH/10;
 		spinnerz = Board.LEVEL_DEPTH - r.nextInt(length);
 		spinnerangle = r.nextDouble();
 		visible = true;
@@ -69,7 +69,7 @@ public class Spike {
 		}
 		else if (spinnerz < Board.LEVEL_DEPTH - length) {
 			// we're at top of spike; grow spike or flip dir
-			if (length < Board.LEVEL_DEPTH - Crawler.CHEIGHT*2 
+			if (length < Board.LEVEL_DEPTH - Crawler.CHEIGHT*2
 					&& r.nextInt(2) > 0) {
 				length+= IMPACT_DAMAGE_LENGTH;
 			}
@@ -122,7 +122,7 @@ public class Spike {
 		int p1y=column.getFirstPointY();
 		int p2x=column.getSecondPointX();
 		int p2y=column.getSecondPointY();
-		coords.get(0).setXYZ(p1x + (p2x - p1x)/2,p1y + (p2y - p1y)/2,Board.LEVEL_DEPTH);
+		coords.get(0).setXYZ(p1x + (p2x - p1x)/2,p1y + (p2y - p1y)/2, Board.LEVEL_DEPTH);
 		coords.get(1).setXYZ(coords.get(0));
 		coords.get(1).setZ(Board.LEVEL_DEPTH - length);
 		coordsMap.coords=coords;

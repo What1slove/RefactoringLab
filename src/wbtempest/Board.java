@@ -248,21 +248,21 @@ public class Board extends JPanel implements ActionListener {
     }
 
     /**
-     * draw the inpassed object; inpassed coords are 3D.
-     * @param g2d
-     * @param color
-     */
-    private void drawObject(Graphics2D g2d, Color color, GameObjectCoordsMap object){
-    	drawObject(g2d, color, object, 0);
-    }
+	 * draw the inpassed object; inpassed coords are 3D.
+	 * @param g2d
+	 * @param color
+	 */
+	private void drawObject(Graphics2D g2d, Color color, GameObjectCoordsMap object){
+		drawObject(g2d, color, object, 0);
+	}
     
     /**
      * Draw the object inpassed, which is assumed to be a set of coordinates
      * of dots to connect.  inpassed coords are 3d.
-     * 
-     * The goal here is to emulate the vector graphics style of tempest, where 
+     *
+     * The goal here is to emulate the vector graphics style of tempest, where
      * everything is a combination of drawn lines.
-     *  
+     *
      * @param g2d - the graphics control object
      * @param color - which color to use to render the object.
      * @param zoffset
@@ -286,9 +286,9 @@ public class Board extends JPanel implements ActionListener {
     }
     
     /**
-     * Draw the actual board, based on the coordinates of the front of the 
+     * Draw the actual board, based on the coordinates of the front of the
      * current level.  depth axis is generated.
-     * 
+     *
      * @param g2d
      * @param colCoords
      */
@@ -296,7 +296,7 @@ public class Board extends JPanel implements ActionListener {
     	int oldx = 0, oldy=0, oldbackx=0, oldbacky=0;
     	int z=LEVEL_DEPTH;
     	Color boardColor = levelinfo.getLevelColor();
-    	if (superzapperTicksLeft > 0) { 
+    	if (superzapperTicksLeft > 0) {
     		boardColor = new Color(r.nextInt(255),r.nextInt(255),r.nextInt(255));
     		superzapperTicksLeft--;
     	}
@@ -339,7 +339,7 @@ public class Board extends JPanel implements ActionListener {
 
     /**
      * draw centered text at inpassed y.
-     * 
+     *
      * @param g2d
      * @param text
      * @param y
@@ -360,82 +360,51 @@ public class Board extends JPanel implements ActionListener {
 
 		if (pause)
     	{
-    		g.setColor(Color.white);
-    		g.setFont(bigfnt);
-    		drawCenteredText(g2d, "PAUSED", getHeight() / 2);
-    		return;
+			drawPauseText(g, g2d);
+			return;
     	}
-    	
+
     	super.paint(g); // will clear screen
 
-    	if (!gameover) {
-    		// draw level board
+		if (gameover) {
+			drawGameoverText(g, g2d);
+
+			FileWriter f=null;
+			try {
+				f = new FileWriter("wbt.hi");
+				f.write(Integer.toString(hiscore));
+				f.close();
+			}
+			catch (Exception e)
+			{ // if we can't write the hi score file...oh well.
+			}
+
+		}
+    	else {
     		drawBoard(g2d, levelinfo.getBoardFrontCoords(), crawler.getColumn());
-
-    		// draw crawler
-    		if (crawler.isVisible()){
-    			Color c = Color.YELLOW;
-    			if (dptLeft > 0)
-    				c = new Color(r.nextInt(255),r.nextInt(255),r.nextInt(255));
-    			drawObject(g2d, c, crawler.getCoords(), crawlerzoffset);
-    		}
-    		
-    		if (boardpov < -Crawler.CHEIGHT) {
-    			// pov shows game level board in the distance; add stars for fun
-    			for (GameObjectCoordsMap s : stars) {
-    				Color c = new Color(r.nextInt(255),r.nextInt(255),r.nextInt(255));
-    				drawObject(g2d, c, s);
-    			}
-    		}
-
-    		// draw crawler's missiles
-    		Color missileColors[] = {Color.BLUE, Color.RED, Color.green};
-    		for (Missile m : crawler.getMissiles()) {
-    			if (m.isVisible()) {
-    				drawObject(g2d, Color.YELLOW, m.getCoords(levelinfo));
-    				drawObject(g2d, missileColors[r.nextInt(missileColors.length)], m.getLayerCoords(levelinfo));
-    			}
-    		}
-
-    		// draw exes
-    		for (Ex ex : exes) {
-    			if (ex.isVisible())
-    				if (ex.isPod())
-        				drawObject(g2d, Color.MAGENTA, ex.getCoords(levelinfo), crawlerzoffset);
-    				else
-    					drawObject(g2d, Color.RED, ex.getCoords(levelinfo), crawlerzoffset);
-    			else {
-    				// not visible but still in list means just killed
-    				drawObject(g2d, Color.WHITE, ex.getDeathCoords(levelinfo)); 
-    			}
-    		}
-
-    		// draw enemy missiles
-    		for (Missile exm : enemymissiles) {
-    			if (exm.isVisible()) {
-    				drawObject(g2d, Color.GRAY, exm.getCoords(levelinfo));
-    				drawObject(g2d, Color.RED, exm.getLayerCoords(levelinfo));
-    			}
-    		}
-
-    		// draw spikes and spinnythings
-    		for (Spike s : spikes) {
-    			if (s.isVisible()) {
-					GameObjectCoordsMap spikeCoords = s.getCoords(levelinfo);
-    				drawObject(g2d, Color.GREEN, spikeCoords);
-    				spikeCoords.coords.set(0, spikeCoords.coords.get(1)); // add white dot at end
-    				drawObject(g2d, Color.WHITE, spikeCoords);
-    				if (s.isSpinnerVisible()) {
-						GameObjectCoordsMap spinCoords = s.getSpinnerCoords(levelinfo);
-        				drawObject(g2d, Color.GREEN, spinCoords);
-    				}
-    			}
-    		}
-
-    		// other crudethings?  vims, for extra lives?
+			drawCrawler(g2d);
+			drawStars(g2d);
+			drawCrawlerMissiles(g2d);
+			drawExes(g2d);
+			drawEnemyMissiles(g2d);
+			drawSpikes(g2d);
     	}
+		drawGameInformation(g2d);
+		if (levelprep){
+			drawLevelChangeText(g2d);
+		}
 
-    	g2d.setColor(Color.GREEN);
+    	Toolkit.getDefaultToolkit().sync();
+    	g.dispose();
+    }
+
+	private void drawLevelChangeText(Graphics2D g2d) {
+		g2d.setColor(Color.YELLOW);
+		drawCenteredText(g2d, "SUPERZAPPER RECHARGE", B_HEIGHT *2/3);
+	}
+
+	private void drawGameInformation(Graphics2D g2d) {
+		g2d.setColor(Color.GREEN);
 		g2d.setFont(bigfnt);
 //		g2d.drawString("SCORE:", 5, 15);
 		g2d.drawString(Integer.toString(score), 100, 50);
@@ -446,35 +415,93 @@ public class Board extends JPanel implements ActionListener {
 		drawCenteredText(g2d, "LEVEL: "+levelnum, 55);
 		g2d.drawString("LIVES:", 680, 30);
 		g2d.drawString(Integer.toString(lives), 745, 30);
-		
-		if (levelprep){
-			g2d.setColor(Color.YELLOW);
-			drawCenteredText(g2d, "SUPERZAPPER RECHARGE", B_HEIGHT *2/3);
+	}
+
+	private void drawPauseText(Graphics g, Graphics2D g2d) {
+		g.setColor(Color.white);
+		g.setFont(bigfnt);
+		drawCenteredText(g2d, "PAUSED", getHeight() / 2);
+	}
+
+	private void drawGameoverText(Graphics g, Graphics2D g2d) {
+		g.setColor(Color.GREEN);
+		drawCenteredText(g2d, "GAME OVER", getHeight() / 2, bigfnt);
+		drawCenteredText(g2d, "PRESS SPACE TO RESTART", getHeight() * 3/4);
+	}
+
+	private void drawSpikes(Graphics2D g2d) {
+		// draw spikes and spinnythings
+		for (Spike s : spikes) {
+			if (s.isVisible()) {
+				GameObjectCoordsMap spikeCoords = s.getCoords(levelinfo);
+				drawObject(g2d, Color.GREEN, spikeCoords);
+				spikeCoords.coords.set(0, spikeCoords.coords.get(1)); // add white dot at end
+				drawObject(g2d, Color.WHITE, spikeCoords);
+				if (s.isSpinnerVisible()) {
+					GameObjectCoordsMap spinCoords = s.getSpinnerCoords(levelinfo);
+					drawObject(g2d, Color.GREEN, spinCoords);
+				}
+			}
 		}
+	}
 
-	
-		if (gameover) {
-    		g.setColor(Color.GREEN);
-    		drawCenteredText(g2d, "GAME OVER", getHeight() / 2, bigfnt);
-    		drawCenteredText(g2d, "PRESS SPACE TO RESTART", getHeight() * 3/4);
+	private void drawEnemyMissiles(Graphics2D g2d) {
+		// draw enemy missiles
+		for (Missile exm : enemymissiles) {
+			if (exm.isVisible()) {
+				drawObject(g2d, Color.GRAY, exm.getCoords(levelinfo));
+				drawObject(g2d, Color.RED, exm.getLayerCoords(levelinfo));
+			}
+		}
+	}
 
-    		FileWriter f=null;
-            try {
-            	f = new FileWriter("wbt.hi");
-            	f.write(Integer.toString(hiscore));
-        		f.close();
-            }
-            catch (Exception e)
-            { // if we can't write the hi score file...oh well.	
-            }
-    		
-    	}
+	private void drawExes(Graphics2D g2d) {
+		// draw exes
+		for (Ex ex : exes) {
+			if (ex.isVisible())
+				if (ex.isPod())
+					drawObject(g2d, Color.MAGENTA, ex.getCoords(levelinfo), crawlerzoffset);
+				else
+					drawObject(g2d, Color.RED, ex.getCoords(levelinfo), crawlerzoffset);
+			else {
+				// not visible but still in list means just killed
+				drawObject(g2d, Color.WHITE, ex.getDeathCoords(levelinfo));
+			}
+		}
+	}
 
-    	Toolkit.getDefaultToolkit().sync();
-    	g.dispose();
-    }
-    
-    private boolean isPlayerDead(){
+	private void drawCrawlerMissiles(Graphics2D g2d) {
+		// draw crawler's missiles
+		Color missileColors[] = {Color.BLUE, Color.RED, Color.green};
+		for (Missile m : crawler.getMissiles()) {
+			if (m.isVisible()) {
+				drawObject(g2d, Color.YELLOW, m.getCoords(levelinfo));
+				drawObject(g2d, missileColors[r.nextInt(missileColors.length)], m.getLayerCoords(levelinfo));
+			}
+		}
+	}
+
+	private void drawStars(Graphics2D g2d) {
+		if (boardpov < -Crawler.CHEIGHT) {
+			// pov shows game level board in the distance; add stars for fun
+				for (GameObjectCoordsMap s : stars) {
+				Color c = new Color(r.nextInt(255),r.nextInt(255),r.nextInt(255));
+				drawObject(g2d, c, s);
+			}
+		}
+	}
+
+	private void drawCrawler(Graphics2D g2d) {
+		// draw crawler
+		if (crawler.isVisible()){
+			Color c = Color.YELLOW;
+			if (dptLeft > 0)
+				c = new Color(r.nextInt(255),r.nextInt(255),r.nextInt(255));
+			drawObject(g2d, c, crawler.getCoords(), crawlerzoffset);
+		}
+	}
+
+	private boolean isPlayerDead(){
     	return (clearboard && !levelcleared) || crawlerSpiked;
     }
     
