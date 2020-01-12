@@ -516,7 +516,6 @@ public class Board extends JPanel implements ActionListener {
 
     	if (pause)
     		return; // if we're on pause, don't do anything.
-
     	// if player died, they don't get to move crawler or superzap
     	if (!isPlayerDead()){
     		crawler.move(crawlerzoffset);
@@ -524,42 +523,19 @@ public class Board extends JPanel implements ActionListener {
         		superzapperTicksLeft = SUPERZAPPER_TICKS;
         	}
     	}
-   	
     	if (clearboard)	{ 
     		// if we're clearing the board, updating reduces to the boardclear animations
     		if (crawlerSpiked) {
-    			dptLeft -=1;
-    			if (dptLeft <= 0)
-    				if (lives > 0)
-    					replayLevel();
-    				else
-    					crawlerSpiked = false; // damage has been done; other case will now handle game over.
-    		}
+				CheckDamage();
+			}
     		else if (levelcleared)
-    		{   // player passed level.  
-    			// pull board out towards screen until player leaves far end of board.
-    			boardpov += SPEED_LEV_ADVANCE;
-    			if (crawlerzoffset < LEVEL_DEPTH)
-    				crawlerzoffset+=SPEED_LEV_ADVANCE; 
-
-    			if (boardpov > LEVEL_DEPTH * 5/4)
-    			{
-     				levelnum++;
-    				initLevel();
-    				boardpov = -LEVEL_DEPTH * 2;
-    				levelprep=true;
-    			}
-    		}
+    		{
+				GoToNextLevel();
+			}
     		else if (lives > 0)
-    		{   // player died but not out of lives.
-    			// pause, then suck crawler down and restart level
-    			dptLeft -=1;
-    			if (dptLeft <= 0) {
-    				crawlerzoffset += SPEED_LEV_ADVANCE*2;
-    				if (crawlerzoffset > LEVEL_DEPTH)
-    					replayLevel();
-    			}
-    		}
+    		{
+				RessurectCrawler();
+			}
     		else
     		{ // player died and game is over.  advance everything along z away from player.
     			if (boardpov > -LEVEL_DEPTH *5)
@@ -568,7 +544,6 @@ public class Board extends JPanel implements ActionListener {
     				gameover=true;
     		}
     	}
-
     	if (lives > 0)
     	{
     		if (levelprep)
@@ -581,83 +556,130 @@ public class Board extends JPanel implements ActionListener {
     				levelprep = false;
     			}
     		}
-
-    		// update player missile positions
-    		ArrayList<Missile> ms = crawler.getMissiles();
-    		for (int i = 0; i < ms.size(); i++) {
-    			Missile m = (Missile) ms.get(i);
-    			if (m.isVisible()) 
-    				m.move(LEVEL_DEPTH);
-    			else
-    				ms.remove(i);
-    		}
-
-    		if (!isPlayerDead())
-    		{   // if the player is alive, the exes and spikes can move and shoot
-    			for (int i = 0; i < exes.size(); i++) {
-    				Ex ex = (Ex) exes.get(i);
-    				if (ex.isVisible()) 
-    				{
-    					ex.move(B_WIDTH, crawler.getColumn());
-    					if (ex.getZ() <= 0) {
-    				        if (ex.isPod()) {
-    				        	// we're at the top of the board; split the pod
-    				        	exes.add(ex.spawn());
-    				        	ex.setPod(false);
-    				        }
-    					}
-    					if ((ex.getZ() < LEVEL_DEPTH) 
-    							&& (r.nextInt(10000) < levelinfo.getExFireBPS()))
-    					{ // this ex fires a missile
-    						enemymissiles.add(new Missile(ex.getColumn(), ex.getZ(), false));
-        	        		SoundManager.get().play(Sound.ENEMYFIRE);
-    					}
-    				}
-    				else 
-    					exes.remove(i);
-    			}
-    			
-    			for (Spike s : spikes) {
-    				if (s.isVisible()) {
-    					if (s.isSpinnerVisible()) {
-    						s.move();
-        					if ((s.getSpinnerZ() < LEVEL_DEPTH) 
-        							&& (r.nextInt(10000) < levelinfo.getExFireBPS()/4))
-        					{ // with 1/4 the frequency of an ex, this spinner fires a missile
-        						enemymissiles.add(new Missile(s.getColumn(), s.getSpinnerZ(), false));
-            	        		SoundManager.get().play(Sound.ENEMYFIRE);
-        					}
-    					}
-    				}
-    			}
-    		}
-    		
-
-    		// update ex missiles
-    		for (int i = 0; i < enemymissiles.size(); i++) {
-    			Missile exm = (Missile) enemymissiles.get(i);
-    			if (exm.isVisible()) 
-    				exm.move(LEVEL_DEPTH);
-    			else {
-    				enemymissiles.remove(i);
-    			}
-    		}
-
-    		if (!isPlayerDead())
-    			checkCollisions();
-
-    		// did player clear level?
-    		if (exes.size() <= 0 && !crawlerSpiked && !levelcleared)
+			UpdateCrawlerMissile();
+			if (!isPlayerDead())
     		{
-    			levelcleared = true;
-    			clearboard = true;
-        		SoundManager.get().play(Sound.LEVELCLEAR);
-    		}
-    	}
+				UpdateExes();
+				updateSpikes();
+				checkCollisions();
+			}
+			UpdateExMissiles();
+			LevelClearCheck();
+		}
     	repaint();  
     }
-    
-    private void playerDeath() {
+
+	private void RessurectCrawler() {
+		// player died but not out of lives.
+		// pause, then suck crawler down and restart level
+		dptLeft -=1;
+		if (dptLeft <= 0) {
+			crawlerzoffset += SPEED_LEV_ADVANCE*2;
+			if (crawlerzoffset > LEVEL_DEPTH)
+				replayLevel();
+		}
+	}
+
+	private void GoToNextLevel() {
+		// player passed level.
+		// pull board out towards screen until player leaves far end of board.
+		boardpov += SPEED_LEV_ADVANCE;
+		if (crawlerzoffset < LEVEL_DEPTH)
+			crawlerzoffset+=SPEED_LEV_ADVANCE;
+
+		if (boardpov > LEVEL_DEPTH * 5/4)
+		{
+			 levelnum++;
+			initLevel();
+			boardpov = -LEVEL_DEPTH * 2;
+			levelprep=true;
+		}
+	}
+
+	private void CheckDamage() {
+		dptLeft -=1;
+		if (dptLeft <= 0)
+			if (lives > 0)
+				replayLevel();
+			else
+				crawlerSpiked = false; // damage has been done; other case will now handle game over.
+	}
+
+	private void LevelClearCheck() {
+		if (exes.size() <= 0 && !crawlerSpiked && !levelcleared)
+		{
+			levelcleared = true;
+			clearboard = true;
+			SoundManager.get().play(Sound.LEVELCLEAR);
+		}
+	}
+
+	private void UpdateExMissiles() {
+		for (int i = 0; i < enemymissiles.size(); i++) {
+			Missile exm = (Missile) enemymissiles.get(i);
+			if (exm.isVisible())
+				exm.move(LEVEL_DEPTH);
+			else {
+				enemymissiles.remove(i);
+			}
+		}
+	}
+
+	private void UpdateExes() {
+		// if the player is alive, the exes and spikes can move and shoot
+		for (int i = 0; i < exes.size(); i++) {
+			Ex ex = (Ex) exes.get(i);
+			if (ex.isVisible())
+			{
+				ex.move(B_WIDTH, crawler.getColumn());
+				if (ex.getZ() <= 0) {
+					if (ex.isPod()) {
+						// we're at the top of the board; split the pod
+						exes.add(ex.spawn());
+						ex.setPod(false);
+					}
+				}
+				if ((ex.getZ() < LEVEL_DEPTH)
+						&& (r.nextInt(10000) < levelinfo.getExFireBPS()))
+				{ // this ex fires a missile
+					enemymissiles.add(new Missile(ex.getColumn(), ex.getZ(), false));
+					SoundManager.get().play(Sound.ENEMYFIRE);
+				}
+			}
+			else
+				exes.remove(i);
+		}
+	}
+
+	private void updateSpikes() {
+		for (Spike s : spikes) {
+			if (s.isVisible()) {
+				if (s.isSpinnerVisible()) {
+					s.move();
+					if ((s.getSpinnerZ() < LEVEL_DEPTH)
+							&& (r.nextInt(10000) < levelinfo.getExFireBPS()/4))
+					{ // with 1/4 the frequency of an ex, this spinner fires a missile
+						enemymissiles.add(new Missile(s.getColumn(), s.getSpinnerZ(), false));
+						SoundManager.get().play(Sound.ENEMYFIRE);
+					}
+				}
+			}
+		}
+	}
+
+	private void UpdateCrawlerMissile() {
+		// update player missile positions
+		ArrayList<Missile> ms = crawler.getMissiles();
+		for (int i = 0; i < ms.size(); i++) {
+			Missile m = (Missile) ms.get(i);
+			if (m.isVisible())
+				m.move(LEVEL_DEPTH);
+			else
+				ms.remove(i);
+		}
+	}
+
+	private void playerDeath() {
     	lives--;
     	clearboard = true;
 		dptLeft = DEATH_PAUSE_TICKS;
