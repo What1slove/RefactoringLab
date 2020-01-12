@@ -629,25 +629,25 @@ public class Board extends JPanel implements ActionListener {
 		// if the player is alive, the exes and spikes can move and shoot
 		for (int i = 0; i < exes.size(); i++) {
 			Ex ex = (Ex) exes.get(i);
-			if (ex.isVisible())
+			if (!ex.isVisible())
 			{
-				ex.move(B_WIDTH, crawler.getColumn());
-				if (ex.getZ() <= 0) {
-					if (ex.isPod()) {
-						// we're at the top of the board; split the pod
-						exes.add(ex.spawn());
-						ex.setPod(false);
-					}
-				}
-				if ((ex.getZ() < LEVEL_DEPTH)
-						&& (r.nextInt(10000) < levelinfo.getExFireBPS()))
-				{ // this ex fires a missile
-					enemymissiles.add(new Missile(ex.getColumn(), ex.getZ(), false));
-					SoundManager.get().play(Sound.ENEMYFIRE);
+				exes.remove(i);
+				continue;
+			}
+			ex.move(B_WIDTH, crawler.getColumn());
+			if (ex.getZ() <= 0) {
+				if (ex.isPod()) {
+					// we're at the top of the board; split the pod
+					exes.add(ex.spawn());
+					ex.setPod(false);
 				}
 			}
-			else
-				exes.remove(i);
+			if ((ex.getZ() < LEVEL_DEPTH)
+					&& (r.nextInt(10000) < levelinfo.getExFireBPS()))
+			{ // this ex fires a missile
+				enemymissiles.add(new Missile(ex.getColumn(), ex.getZ(), false));
+				SoundManager.get().play(Sound.ENEMYFIRE);
+			}
 		}
 	}
 
