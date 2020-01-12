@@ -689,119 +689,136 @@ public class Board extends JPanel implements ActionListener {
     	int cCol = crawler.getColumn();
 
     	if (clearboard && levelcleared && !crawlerSpiked) {
-    		// check spike/player
-    		for (Spike s : spikes) {
-    			if (s.isVisible() && s.getColumn() == cCol && ((LEVEL_DEPTH-s.getLength()) < crawlerzoffset)) {
-    				playerDeath();
-    				crawlerSpiked = true;
-    				levelcleared = false;  
-    				break;
-    			}
-    		}
-    	}
+			CheckPlayerWithSpikeCollision(cCol);
+		}
     	else {
-    		// check ex/player
-        	for (Ex ex : exes) {
-        		if ((ex.getColumn() == cCol) && (ex.getZ() < Ex.HEIGHT)) {
-        			playerDeath();
-        			ex.resetState();
-        			break;
-        		}
-        	}
-
-        	// check exes' missiles / player
-    		for (Missile exm : enemymissiles) {
-    			if (exm.isVisible() 
-    					&& (exm.getColumn() == crawler.getColumn()) && (exm.getZPos() < Crawler.CHEIGHT)) 
-    			{
-    				playerDeath();
-    				exm.setVisible(false);
-    				break;
-    			}
-    		}
-
-    	}
-
-    	// while not really a collision, the superzapper acts more or less like a 
-    	// collision with all on-board non-pod exes, so it goes here.
-    	if (superzapperTicksLeft == SUPERZAPPER_TICKS/2) {
-    		// halfway through the superzap, actually destroy exes
-    		for (Ex ex : exes){
-    			if (ex.getZ() < LEVEL_DEPTH && !ex.isPod()) {
-    				ex.setVisible(false);
-            		SoundManager.get().play(Sound.ENEMYDEATH);
-    			}
-    		}
-    	}
-
-    	// check player's missiles vs everything
+			CheckPlayerWithExCollision(cCol);
+			CheckPlayerWithExMissileCollision();
+		}
+		CheckExWithSuperzapCollision();
+    	
     	int ncols = levelinfo.getColumns().size();
     	for (Missile m : crawler.getMissiles()) {
-    		// vs exes:
-    		Ex newEx = null; // if this missile hits a pod, we may spawn a new ex
-    		for (Ex ex : exes) {
-    			// check for normal missile/ex collision, also ex adjacent to crawler
-    			if (m.isVisible() 
-    					&& (m.getColumn() == ex.getColumn() && (Math.abs(m.getZPos() - ex.getZ())< Ex.HEIGHT)) 
-    					|| ((m.getColumn() == crawler.getColumn()) 
-    							&& (ex.getZ() <= 0)
-    							&& (r.nextInt(10) < 9)  // 90% success rate for hitting adjacent exes
-    							&& (m.getZPos() < Crawler.CHEIGHT*2)
-    							&& (((ex.getColumn() +1)%ncols == crawler.getColumn())
-    									|| ((crawler.getColumn()+1)%ncols == ex.getColumn())))){
-    				if (ex.isPod()) { 
-    					// this ex is a pod; split into normal exes
-    					score += Ex.PODSCOREVAL;
-    					m.setVisible(false);
-    					ex.setPod(false);
-    					newEx = ex.spawn();
-    	        		SoundManager.get().play(Sound.ENEMYDEATH);
-    				}
-    				else {
-    					// player hit ex
-    					m.setVisible(false);
-    					ex.setVisible(false);
-    					score += Ex.SCOREVAL;
-    	        		SoundManager.get().play(Sound.ENEMYDEATH);
-    					break;
-    				}
-    			}
-    		}
-    		if (newEx != null)
-    			exes.add(newEx);
-
-    		// vs exmissiles:
-    		if (m.isVisible()) {
-    			for (Missile exm : enemymissiles) {
-    				if ((m.getColumn() == exm.getColumn())
-    						&& (exm.getZPos() - m.getZPos() < Missile.HEIGHT)) {
-    					exm.setVisible(false);
-    					m.setVisible(false);
-    				}
-    			}
-    		}
-
-    		// vs spikes
-    		if (m.isVisible()) {
-    			for (Spike s : spikes) {
-    				if (s.isVisible() 
-    						&& m.getColumn() == s.getColumn() 
-    						&& ((LEVEL_DEPTH - s.getLength()) < m.getZPos())) {
-    					s.impact();
-    					m.setVisible(false);
-    					score += Spike.SPIKE_SCORE;
-    					if (s.isSpinnerVisible() &&
-    							Math.abs(s.getSpinnerZ() - m.getZPos()) < Missile.HEIGHT) {
-    						s.setSpinnerVisible(false);
-    						score += Spike.SPINNER_SCORE;
-    					}
-    				}
-    			}
-    		}
-    	}
+			CheckPlayerMissileWithExCollision(ncols, m);
+			CheckPlayerMissileWithExMissileCollision(m);
+			CheckPlayerMissileWithSpikeCollision(m);
+		}
     }
 
-    /**
+	private void CheckPlayerMissileWithSpikeCollision(Missile m) {
+		if (m.isVisible()) {
+			for (Spike s : spikes) {
+				if (s.isVisible()
+						&& m.getColumn() == s.getColumn()
+						&& ((LEVEL_DEPTH - s.getLength()) < m.getZPos())) {
+					s.impact();
+					m.setVisible(false);
+					score += Spike.SPIKE_SCORE;
+					if (s.isSpinnerVisible() &&
+							Math.abs(s.getSpinnerZ() - m.getZPos()) < Missile.HEIGHT) {
+						s.setSpinnerVisible(false);
+						score += Spike.SPINNER_SCORE;
+					}
+				}
+			}
+		}
+	}
+
+	private void CheckPlayerMissileWithExMissileCollision(Missile m) {
+		if (m.isVisible()) {
+			for (Missile exm : enemymissiles) {
+				if ((m.getColumn() == exm.getColumn())
+						&& (exm.getZPos() - m.getZPos() < Missile.HEIGHT)) {
+					exm.setVisible(false);
+					m.setVisible(false);
+				}
+			}
+		}
+	}
+
+	private void CheckPlayerMissileWithExCollision(int ncols, Missile m) {
+		Ex newEx = null; // if this missile hits a pod, we may spawn a new ex
+		for (Ex ex : exes) {
+			// check for normal missile/ex collision, also ex adjacent to crawler
+			if (m.isVisible()
+					&& (m.getColumn() == ex.getColumn() && (Math.abs(m.getZPos() - ex.getZ())< Ex.HEIGHT))
+					|| ((m.getColumn() == crawler.getColumn())
+							&& (ex.getZ() <= 0)
+							&& (r.nextInt(10) < 9)  // 90% success rate for hitting adjacent exes
+							&& (m.getZPos() < Crawler.CHEIGHT*2)
+							&& (((ex.getColumn() +1)%ncols == crawler.getColumn())
+									|| ((crawler.getColumn()+1)%ncols == ex.getColumn())))){
+				if (ex.isPod()) {
+					// this ex is a pod; split into normal exes
+					score += Ex.PODSCOREVAL;
+					m.setVisible(false);
+					ex.setPod(false);
+					newEx = ex.spawn();
+					SoundManager.get().play(Sound.ENEMYDEATH);
+				}
+				else {
+					// player hit ex
+					m.setVisible(false);
+					ex.setVisible(false);
+					score += Ex.SCOREVAL;
+					SoundManager.get().play(Sound.ENEMYDEATH);
+					break;
+				}
+			}
+		}
+		if (newEx != null)
+			exes.add(newEx);
+	}
+
+	private void CheckExWithSuperzapCollision() {
+		// while not really a collision, the superzapper acts more or less like a
+		// collision with all on-board non-pod exes, so it goes here.
+		if (superzapperTicksLeft == SUPERZAPPER_TICKS/2) {
+			// halfway through the superzap, actually destroy exes
+			for (Ex ex : exes){
+				if (ex.getZ() < LEVEL_DEPTH && !ex.isPod()) {
+					ex.setVisible(false);
+					SoundManager.get().play(Sound.ENEMYDEATH);
+				}
+			}
+		}
+	}
+
+	private void CheckPlayerWithExMissileCollision() {
+		for (Missile exm : enemymissiles) {
+			if (exm.isVisible()
+					&& (exm.getColumn() == crawler.getColumn()) && (exm.getZPos() < Crawler.CHEIGHT))
+			{
+				playerDeath();
+				exm.setVisible(false);
+				break;
+			}
+		}
+	}
+
+	private void CheckPlayerWithExCollision(int cCol) {
+		for (Ex ex : exes) {
+			if ((ex.getColumn() == cCol) && (ex.getZ() < Ex.HEIGHT)) {
+				playerDeath();
+				ex.resetState();
+				break;
+			}
+		}
+	}
+
+	private void CheckPlayerWithSpikeCollision(int cCol) {
+		// check spike/player
+		for (Spike s : spikes) {
+			if (s.isVisible() && s.getColumn() == cCol && ((LEVEL_DEPTH-s.getLength()) < crawlerzoffset)) {
+				playerDeath();
+				crawlerSpiked = true;
+				levelcleared = false;
+				break;
+			}
+		}
+	}
+
+	/**
      * Handle user keypresses.
      * @author ugliest
      *
