@@ -606,12 +606,12 @@ public class Board extends JPanel implements ActionListener {
 	}
 
 	private void LevelClearCheck() {
-		if (exes.size() <= 0 && !crawlerSpiked && !levelcleared)
-		{
-			levelcleared = true;
-			clearboard = true;
-			SoundManager.get().play(Sound.LEVELCLEAR);
-		}
+		if (exes.size() > 0 || crawlerSpiked || levelcleared)
+			return;
+
+		levelcleared = true;
+		clearboard = true;
+		SoundManager.get().play(Sound.LEVELCLEAR);
 	}
 
 	private void UpdateExMissiles() {
