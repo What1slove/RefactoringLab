@@ -85,76 +85,46 @@ public class Crawler {
      * 
      * @return
      */
-    public List<int[]> getCoords() {
+    public GameObjectCoordsMap getCoords() {
         int colnum = getColumn();
         int pose = (int)pos % C_POSES / 2; // each pose here is doubled for more manageable movement
-        int[][] coords=new int[9][3]; 
-        
+
+        GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(9);
+        ArrayList<Coord> coords = coordsMap.coords;
         Column column = lev.getColumns().get(colnum);
         int[] pt1 = column.getFrontPoint1();
         int[] pt2 = column.getFrontPoint2();
         switch (pose)
         {
         	case 0:{
-                coords[0][0] = pt1[0] +(pt2[0] - pt1[0])/3;
-                coords[0][1] = pt1[1] +(pt2[1] - pt1[1])/3;
-                coords[0][2] = CHEIGHT_H;
-                coords[2][0] = pt1[0] +(pt2[0] - pt1[0])/4;
-                coords[2][1] = pt1[1] +(pt2[1] - pt1[1])/4;
-                coords[2][2] = -CHEIGHT;
-                coords[4][0] = pt2[0] -(pt2[0] - pt1[0])/4;
-                coords[4][1] = pt2[1] -(pt2[1] - pt1[1])/4;
-                coords[4][2] = CHEIGHT_HP;
-                coords[6][0] = pt1[0] +(pt2[0] - pt1[0])/4;
-                coords[6][1] = pt1[1] +(pt2[1] - pt1[1])/4;
-                coords[6][2] = -CHEIGHT_H;
+                coords.get(0).setXYZ(pt1[0] +(pt2[0] - pt1[0])/3 ,pt1[1] +(pt2[1] - pt1[1])/3,CHEIGHT_H);
+                coords.get(2).setXYZ(pt1[0] +(pt2[0] - pt1[0])/4 ,pt1[1] +(pt2[1] - pt1[1])/4,-CHEIGHT);
+                coords.get(4).setXYZ(pt2[0] -(pt2[0] - pt1[0])/4 ,pt2[1] -(pt2[1] - pt1[1])/4,CHEIGHT_HP);
+                coords.get(6).setXYZ(pt1[0] +(pt2[0] - pt1[0])/4 ,pt1[1] +(pt2[1] - pt1[1])/4,-CHEIGHT_H);
                 break;
         	}
         	case 1: {
-                coords[0][0] = pt1[0] +(pt2[0] - pt1[0])/3;
-                coords[0][1] = pt1[1] +(pt2[1] - pt1[1])/3;
-                coords[0][2] = CHEIGHT_H;
-                coords[2][0] = pt1[0] +(pt2[0] - pt1[0])/2;
-                coords[2][1] = pt1[1] +(pt2[1] - pt1[1])/2;
-                coords[2][2] = -CHEIGHT;
-                coords[4][0] = pt2[0] -(pt2[0] - pt1[0])/3;
-                coords[4][1] = pt2[1] -(pt2[1] - pt1[1])/3;
-                coords[4][2] = CHEIGHT_H;
-                coords[6][0] = pt1[0] +(pt2[0] - pt1[0])/2;
-                coords[6][1] = pt1[1] +(pt2[1] - pt1[1])/2;
-                coords[6][2] = -CHEIGHT_H;
+                coords.get(0).setXYZ(pt1[0] +(pt2[0] - pt1[0])/3 ,pt1[1] +(pt2[1] - pt1[1])/3,CHEIGHT_H);
+                coords.get(2).setXYZ(pt1[0] +(pt2[0] - pt1[0])/2 ,pt1[1] +(pt2[1] - pt1[1])/2,-CHEIGHT);
+                coords.get(4).setXYZ(pt2[0] -(pt2[0] - pt1[0])/3,pt2[1] -(pt2[1] - pt1[1])/3,CHEIGHT_H);
+                coords.get(6).setXYZ(pt1[0] +(pt2[0] - pt1[0])/2 ,pt1[1] +(pt2[1] - pt1[1])/2,-CHEIGHT_H);
                 break;
         	}
         	case 2: {
-                coords[0][0] = pt1[0] +(pt2[0] - pt1[0])/4;
-                coords[0][1] = pt1[1] +(pt2[1] - pt1[1])/4;
-                coords[0][2] = CHEIGHT_HP;
-                coords[2][0] = pt1[0] +(pt2[0] - pt1[0])*3/4;
-                coords[2][1] = pt1[1] +(pt2[1] - pt1[1])*3/4;
-                coords[2][2] = -CHEIGHT;
-                coords[4][0] = pt2[0] -(pt2[0] - pt1[0])/3;
-                coords[4][1] = pt2[1] -(pt2[1] - pt1[1])/3;
-                coords[4][2] = CHEIGHT_H;
-                coords[6][0] = pt1[0] +(pt2[0] - pt1[0])*3/4;
-                coords[6][1] = pt1[1] +(pt2[1] - pt1[1])*2/3;
-                coords[6][2] = -CHEIGHT_H;
+                coords.get(0).setXYZ(pt1[0] +(pt2[0] - pt1[0])/4 ,pt1[1] +(pt2[1] - pt1[1])/4,CHEIGHT_HP);
+                coords.get(2).setXYZ(pt1[0] +(pt2[0] - pt1[0])*3/4 ,pt1[1] +(pt2[1] - pt1[1])*3/4,-CHEIGHT);
+                coords.get(4).setXYZ(pt2[0] -(pt2[0] - pt1[0])/3,pt2[1] -(pt2[1] - pt1[1])/3,CHEIGHT_H);
+                coords.get(6).setXYZ(pt1[0] +(pt2[0] - pt1[0])*3/4 ,pt1[1] +(pt2[1] - pt1[1])*2/3,-CHEIGHT_H);
                 break;
         	}
         }
-        coords[1][0] = pt1[0];
-        coords[1][1] = pt1[1];
-        coords[1][2]=0;
-        coords[3][0] = pt2[0];
-        coords[3][1] = pt2[1];
-        coords[3][2] = 0;
-        coords[5][0] = pt2[0] -(pt2[0] - pt1[0])/6;
-        coords[5][1] = pt2[1] -(pt2[1] - pt1[1])/6;
-        coords[5][2] = 0;
-        coords[7][0] = pt1[0] +(pt2[0] - pt1[0])/6;
-        coords[7][1] = pt1[1] +(pt2[1] - pt1[1])/6;
-        coords[7][2] = 0;
-        coords[8] = coords[0];
-        return Arrays.asList(coords);
+        coords.get(1).setXYZ(pt1[0] ,pt1[1],0);
+        coords.get(3).setXYZ(pt2[0] ,pt2[1],0);
+        coords.get(5).setXYZ(pt2[0] -(pt2[0] - pt1[0])/6 ,pt2[1] -(pt2[1] - pt1[1])/6,0);
+        coords.get(7).setXYZ(pt1[0] +(pt2[0] - pt1[0])/6 ,pt1[1] +(pt2[1] - pt1[1])/6,0);
+        coords.get(8).setXYZ(coords.get(0));
+        coordsMap.coords=coords;
+        return coordsMap;
     }
 
     public Image getImage() {

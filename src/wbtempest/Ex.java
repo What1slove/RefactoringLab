@@ -1,5 +1,6 @@
 package wbtempest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -195,46 +196,26 @@ public class Ex {
     	return (int)z;
     }
     
-    public List<int[]> getDeathCoords(Level lev){
+    public GameObjectCoordsMap getDeathCoords(Level lev){
     	// return death explosion image coords
-    	int[][] coords = new int[15][3];
+		GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(15);
+		ArrayList<Coord> coords = coordsMap.coords;
     	Column c = lev.getColumns().get(col);
     	int[] p1 = c.getFrontPoint1();
     	int[] p2 = c.getFrontPoint2();
-    	coords[0][0] = p1[0] + (p2[0]-p1[0])/5;
-    	coords[0][1] = p1[1] + (p2[0]-p1[0])/5;
-    	coords[0][2] = (int) z;
-    	coords[1][0] = p2[0] - (p2[0]-p1[0])/2;  // center point
-    	coords[1][1] = p2[1] - (p2[1]-p1[1])/2;
-    	coords[1][2] = (int) z;
-    	coords[2][0] = p1[0] + (p2[0]-p1[0])/3;
-    	coords[2][1] = p1[1] + (p2[1]-p1[1])/3;
-    	coords[2][2] = (int) (z + EXHEIGHT_H*2);
-    	coords[3] = coords[1];
-    	coords[4][0] = p2[0] - (p2[0]-p1[0])/2;
-    	coords[4][1] = p2[1] - (p2[1]-p1[1])/2;
-    	coords[4][2] = (int) (z + EXHEIGHT_H*4);
-    	coords[5] = coords[1];
-    	coords[6][0] = p2[0] - (p2[0]-p1[0])/3;
-    	coords[6][1] = p2[1] - (p2[1]-p1[1])/3;
-    	coords[6][2] = (int) (z+EXHEIGHT_H*2);
-    	coords[7] = coords[1];
-    	coords[8][0] = p2[0] - (p2[0]-p1[0])/5;
-    	coords[8][1] = p2[1] - (p2[1]-p1[1])/5;
-    	coords[8][2] = (int) z;
-    	coords[9] = coords[1];
-    	coords[10][0] = p2[0] - (p2[0]-p1[0])/3;
-    	coords[10][1] = p2[1] - (p2[1]-p1[1])/3;
-    	coords[10][2] = (int) (z-EXHEIGHT_H*2);
-    	coords[11] = coords[1];
-    	coords[12][0] = p2[0] - (p2[0]-p1[0])/2;
-    	coords[12][1] = p2[1] - (p2[1]-p1[1])/2;
-    	coords[12][2] = (int) (z - EXHEIGHT_H*4);
-    	coords[13] = coords[1];
-    	coords[14][0] = p1[0] + (p2[0]-p1[0])/3;
-    	coords[14][1] = p1[1] + (p2[1]-p1[1])/3;
-    	coords[14][2] = (int) (z - EXHEIGHT_H*2);
-    	return Arrays.asList(coords);
+		coords.get(0).setXYZ(p1[0] + (p2[0]-p1[0])/5,p1[1] + (p2[0]-p1[0])/5,(int)z);
+		coords.get(2).setXYZ(p1[0] + (p2[0]-p1[0])/3,p1[1] + (p2[1]-p1[1])/3,(int)(z + EXHEIGHT_H*2));
+		coords.get(4).setXYZ(p2[0] - (p2[0]-p1[0])/2,p2[1] - (p2[1]-p1[1])/2,(int)(z + EXHEIGHT_H*4));
+		coords.get(6).setXYZ(p2[0] - (p2[0]-p1[0])/3,p2[1] - (p2[1]-p1[1])/3,(int)(z+EXHEIGHT_H*2));
+		coords.get(8).setXYZ(p2[0] - (p2[0]-p1[0])/5,p2[1] - (p2[1]-p1[1])/5,(int)z);
+		coords.get(10).setXYZ(p2[0] - (p2[0]-p1[0])/3,p2[1] - (p2[1]-p1[1])/3,(int)(z-EXHEIGHT_H*2));
+		coords.get(12).setXYZ(p2[0] - (p2[0]-p1[0])/2,p2[1] - (p2[1]-p1[1])/2,(int)(z - EXHEIGHT_H*4));
+		coords.get(14).setXYZ(p1[0] + (p2[0]-p1[0])/3,p1[1] + (p2[1]-p1[1])/3,(int)(z - EXHEIGHT_H*2));
+		for (int i=1;i<=13;i+=2){
+			coords.get(i).setXYZ(p2[0] - (p2[0]-p1[0])/2,p2[1] - (p2[1]-p1[1])/2,(int)z);
+		}
+		coordsMap.coords=coords;
+    	return  coordsMap;
     }
 
     /**
@@ -251,186 +232,100 @@ public class Ex {
      * @param lev the current level; column information is needed.
      * @return
      */
-    public List<int[]> getCoords(Level lev){
-    	int[][] coords;
+    public GameObjectCoordsMap getCoords(Level lev){
+
+		GameObjectCoordsMap coordsMap;
+
     	Column c = lev.getColumns().get(col);
     	int[] p1 = c.getFrontPoint1();
     	int[] p2 = c.getFrontPoint2();
 
     	if (isPod && z < Board.LEVEL_DEPTH) {
+			coordsMap = new GameObjectCoordsMap(17);
+			ArrayList<Coord> coords = coordsMap.coords;
     		int cx = p1[0] + (p2[0]-p1[0])/2;
     		int cy = p1[1] + (p2[1]-p1[1])/2;
-
-    		// define outer and inner diamonds
-    		int[][] outer = new int[4][3];
-    		int[][] inner = new int[4][3];
-    		outer[0][0] = cx;
-    		outer[0][1] = cy - PODSIZE;
-    		outer[0][2] = (int)z;
-    		outer[1][0] = cx + PODSIZE;
-    		outer[1][1] = cy;
-    		outer[1][2] = (int) z;
-    		outer[2][0] = cx;
-    		outer[2][1] = cy + PODSIZE;
-    		outer[2][2] = (int) z;
-    		outer[3][0] = cx - PODSIZE;
-    		outer[3][1] = cy;
-    		outer[3][2] = (int) z;
-    		inner[0][0] = cx;
-    		inner[0][1] = cy - PODSIZE/3;
-    		inner[0][2] = (int) z;
-    		inner[1][0] = cx + PODSIZE/3;
-    		inner[1][1] = cy;
-    		inner[1][2] = (int) z;
-    		inner[2][0] = cx;
-    		inner[2][1] = cy + PODSIZE/3;
-    		inner[2][2] = (int) z;
-    		inner[3][0] = cx - PODSIZE/3;
-    		inner[3][1] = cy;
-    		inner[3][2] = (int) z;
-
-    		// define line path through those diamonds:
-    		coords = new int[17][3];
-    		coords[0] = outer[0];
-    		coords[1] = outer[1];
-    		coords[2] = inner[1];
-    		coords[3] = inner [0];
-    		coords[4] = outer[1];
-    		coords[5] = outer[2];
-    		coords[6] = inner[2];
-    		coords[7] = inner[1];
-    		coords[8] = outer[2];
-    		coords[9] = outer[3];
-    		coords[10]= inner[3];
-    		coords[11]= inner[2];
-    		coords[12]= outer[3];
-    		coords[13]= outer[0];
-    		coords[14]= inner[0];
-    		coords[15]= inner[3];
-    		coords[16]= outer[0];
+    		coords.get(0).setXYZ(cx,cy - PODSIZE,(int)z);
+			coords.get(1).setXYZ(cx + PODSIZE, cy, (int) z);
+			coords.get(2).setXYZ(cx + PODSIZE/3, cy, (int) z);
+			coords.get(3).setXYZ(cx , cy - PODSIZE/3, (int) z);
+			coords.get(4).setXYZ(coords.get(1));
+			coords.get(5).setXYZ(cx , cy + PODSIZE, (int) z);
+			coords.get(6).setXYZ(cx , cy + PODSIZE/3, (int) z);
+			coords.get(7).setXYZ(coords.get(2));
+			coords.get(8).setXYZ(coords.get(5));
+			coords.get(9).setXYZ(cx - PODSIZE , cy, (int) z);
+			coords.get(10).setXYZ(cx - PODSIZE/3 , cy, (int) z);
+			coords.get(11).setXYZ(coords.get(6));
+			coords.get(12).setXYZ(coords.get(9));
+			coords.get(13).setXYZ(coords.get(0));
+			coords.get(14).setXYZ(coords.get(3));
+			coords.get(15).setXYZ(coords.get(10));
+			coords.get(16).setXYZ(coords.get(0));
+			coordsMap.coords=coords;
     	}
-    	else { 
-    		coords = new int[7][3];
+    	else {
+			coordsMap = new GameObjectCoordsMap(7);
+			ArrayList<Coord> coords = coordsMap.coords;
     		switch (s) {
     		case STRAIGHT:
-    			coords[0][0] = p1[0];
-    			coords[0][1] = p1[1];
-    			coords[0][2] = (int) (z-EXHEIGHT_H);
-    			coords[1][0] = p2[0];
-    			coords[1][1] = p2[1];
-    			coords[1][2] = (int) (z+EXHEIGHT_H);
-    			coords[2][0] = p2[0] - (p2[0]-p1[0])/3;
-    			coords[2][1] = p2[1] - (p2[1]-p1[1])/3;
-    			coords[2][2] = (int) z;
-    			coords[3][0] = p2[0];
-    			coords[3][1] = p2[1];
-    			coords[3][2] = (int) (z-EXHEIGHT_H);
-    			coords[4][0] = p1[0];
-    			coords[4][1] = p1[1];
-    			coords[4][2] = (int) (z+EXHEIGHT_H);
-    			coords[5][0] = p1[0] + (p2[0]-p1[0])/3;
-    			coords[5][1] = p1[1] + (p2[1]-p1[1])/3;
-    			coords[5][2] = (int) z;
-    			coords[6][0] = p1[0];
-    			coords[6][1] = p1[1];
-    			coords[6][2] = (int) (z-EXHEIGHT_H);
+				coords.get(0).setXYZ(p1[0],p1[1],(int) (z-EXHEIGHT_H));
+				coords.get(1).setXYZ(p2[0],p2[1],(int) (z+EXHEIGHT_H));
+				coords.get(2).setXYZ(p2[0] - (p2[0]-p1[0])/3,p2[1] - (p2[1]-p1[1])/3,(int) z);
+				coords.get(3).setXYZ(p2[0],p2[1],(int) (z-EXHEIGHT_H));
+				coords.get(4).setXYZ(p1[0],p1[1],(int) (z+EXHEIGHT_H));
+				coords.get(5).setXYZ(p1[0] + (p2[0]-p1[0])/3,p1[1] + (p2[1]-p1[1])/3,(int) z);
+				coords.get(6).setXYZ(coords.get(0));
     			break;
 
     		case JUMPRIGHT1:
     		case LANDRIGHT2:
-    			coords[0][0] = p1[0] + (p2[0]-p1[0])/4;
-    			coords[0][1] = p1[1] + (p2[1]-p1[1])/4;
-    			coords[0][2] = (int) (z+EXHEIGHT_H*2);
-    			coords[1][0] = p2[0] + (p2[0]-p1[0])/4;
-    			coords[1][1] = p2[1] + (p2[1]-p1[1])/4;
-    			coords[1][2] = (int) (z+EXHEIGHT_H*2);
-    			coords[2][0] = p2[0] - (p2[0]-p1[0])/11;
-    			coords[2][1] = p2[1] - (p2[1]-p1[1])/11;
-    			coords[2][2] = (int) (z+EXHEIGHT_H*1.8);
-    			coords[3][0] = p2[0];
-    			coords[3][1] = p2[1];
-    			coords[3][2] = (int) z;
-    			coords[4][0] = (int) (p1[0] + (p2[0]-p1[0])/2);
-    			coords[4][1] = (int) (p1[1] + (p2[1]-p1[1])/2);
-    			coords[4][2] = (int) (z+ EXHEIGHT_H*5);
-    			coords[5][0] = (int) (p2[0] - (p2[0]-p1[0])/2.5);
-    			coords[5][1] = (int) (p2[1] - (p2[1]-p1[1])/2.5);
-    			coords[5][2] = (int) (z+EXHEIGHT_H *2.6);
-    			coords[6] = coords[0];
+				coords.get(0).setXYZ(p1[0] + (p2[0]-p1[0])/4 ,p2[1] + (p2[1]-p1[1])/4,(int) (z+EXHEIGHT_H*2));
+				coords.get(1).setXYZ(p2[0] + (p2[0]-p1[0])/4 ,p2[1] + (p2[1]-p1[1])/4,(int) (z+EXHEIGHT_H*2));
+				coords.get(2).setXYZ(p2[0] - (p2[0]-p1[0])/11 ,p2[1] - (p2[1]-p1[1])/11,(int) (z+EXHEIGHT_H*1.8));
+				coords.get(3).setXYZ(p2[0] ,p2[1],(int) z);
+				coords.get(4).setXYZ(p1[0] + (p2[0]-p1[0])/2 ,p1[1] + (p2[1]-p1[1])/2,(int)(z+ EXHEIGHT_H*5));
+				coords.get(5).setXYZ((int) (p2[0] - (p2[0]-p1[0])/2.5) ,(int) (p2[1] - (p2[1]-p1[1])/2.5),(int) (z+EXHEIGHT_H *2.6));
+				coords.get(6).setXYZ(coords.get(0));
     			break;
 
     		case JUMPLEFT1:
     		case LANDLEFT2:
-    			coords[0][0] = p1[0];
-    			coords[0][1] = p1[1];
-    			coords[0][2] = (int) z;
-    			coords[1][0] = (int) (p1[0] + (p2[0]-p1[0])/2);
-    			coords[1][1] = (int) (p1[1] + (p2[1]-p1[1])/2);
-    			coords[1][2] = (int) (z+ EXHEIGHT_H*5);
-    			coords[2][0] = (int) (p1[0] + (p2[0]-p1[0])/2.5);
-    			coords[2][1] = (int) (p1[1] + (p2[1]-p1[1])/2.5);
-    			coords[2][2] = (int) (z+EXHEIGHT_H *2.6);
-    			coords[3][0] = p2[0] - (p2[0]-p1[0])/4;
-    			coords[3][1] = p2[1] - (p2[1]-p1[1])/4;
-    			coords[3][2] = (int) (z+EXHEIGHT_H*2);
-    			coords[4][0] = p1[0] - (p2[0]-p1[0])/4;
-    			coords[4][1] = p1[1] - (p2[1]-p1[1])/4;
-    			coords[4][2] = (int) (z+EXHEIGHT_H*2);
-    			coords[5][0] = p1[0] + (p2[0]-p1[0])/11;
-    			coords[5][1] = p1[1] + (p2[1]-p1[1])/11;
-    			coords[5][2] = (int) (z+EXHEIGHT_H*1.8);
-    			coords[6] = coords[0];
+				coords.get(0).setXYZ(p1[0] ,p1[1],(int) z);
+				coords.get(1).setXYZ(p1[0] + (p2[0]-p1[0])/2 ,p1[1] + (p2[1]-p1[1])/2,(int)(z+ EXHEIGHT_H*5));
+				coords.get(2).setXYZ((int) (p1[0] + (p2[0]-p1[0])/2.5) ,(int) (p1[1] + (p2[1]-p1[1])/2.5),(int)(z+EXHEIGHT_H *2.6));
+				coords.get(3).setXYZ(p2[0] - (p2[0]-p1[0])/4 ,p2[1] - (p2[1]-p1[1])/4,(int)(z+EXHEIGHT_H*2));
+				coords.get(4).setXYZ(p1[0] - (p2[0]-p1[0])/4 ,p1[1] - (p2[1]-p1[1])/4,(int)(z+EXHEIGHT_H*2));
+				coords.get(5).setXYZ(p1[0] + (p2[0]-p1[0])/11 ,p1[1] + (p2[1]-p1[1])/11,(int)(z+EXHEIGHT_H*1.8));
+				coords.get(6).setXYZ(coords.get(0));
     			break;
 
     		case JUMPLEFT2:
     		case LANDLEFT1:
-    			coords[0][0] = p1[0];
-    			coords[0][1] = p1[1];
-    			coords[0][2] = (int) z;
-    			coords[1][0] = (int) (p1[0] + (p2[0]-p1[0])/4.5);
-    			coords[1][1] = (int) (p1[1] + (p2[1]-p1[1])/4.5);
-    			coords[1][2] = (int) (z+ EXHEIGHT_H*8);
-    			coords[2][0] = (int) (p1[0] + (p2[0]-p1[0])/4.5);
-    			coords[2][1] = (int) (p1[1] + (p2[1]-p1[1])/4.5);
-    			coords[2][2] = (int) (z+EXHEIGHT_H *4);
-    			coords[3][0] = p2[0] - (p2[0]-p1[0])/2;
-    			coords[3][1] = p2[1] - (p2[1]-p1[1])/2;
-    			coords[3][2] = (int) (z+EXHEIGHT_H*4);
-    			coords[4][0] = (int) (p1[0] - (p2[0]-p1[0])/3.5);
-    			coords[4][1] = (int) (p1[1] - (p2[1]-p1[1])/3.5);
-    			coords[4][2] = (int) (z+EXHEIGHT_H*1.8);
-    			coords[5][0] = p1[0];// - (p2[0]-p1[0])/15;
-    			coords[5][1] = p1[1];// - (p2[1]-p1[1])/15;
-    			coords[5][2] = (int) (z+EXHEIGHT_H*1.8);
-    			coords[6] = coords[0];
+				coords.get(0).setXYZ(p1[0] ,p1[1],(int) z);
+				coords.get(1).setXYZ((int) (p1[0] + (p2[0]-p1[0])/4.5) ,(int) (p1[1] + (p2[1]-p1[1])/4.5),(int) (z+ EXHEIGHT_H*8));
+				coords.get(2).setXYZ((int) (p1[0] + (p2[0]-p1[0])/4.5) ,(int) (p1[1] + (p2[1]-p1[1])/4.5),(int) (z+EXHEIGHT_H *4));
+				coords.get(3).setXYZ(p2[0] - (p2[0]-p1[0])/2 ,p2[1] - (p2[1]-p1[1])/2,(int) (z+EXHEIGHT_H *4));
+				coords.get(4).setXYZ((int) (p1[0] - (p2[0]-p1[0])/3.5) ,(int) (p1[1] - (p2[1]-p1[1])/3.5),(int) (z+EXHEIGHT_H*1.8));
+				coords.get(5).setXYZ(p1[0] ,p1[1],(int) (z+EXHEIGHT_H*1.8));
+				coords.get(6).setXYZ(coords.get(0));
     			break;
 
     		case JUMPRIGHT2:
     		case LANDRIGHT1:
-    			coords[0][0] = p2[0] - (p2[0]-p1[0])/2;
-    			coords[0][1] = p2[1] - (p2[1]-p1[1])/2;
-    			coords[0][2] = (int) (z+EXHEIGHT_H*4);
-    			coords[1][0] = (int) (p2[0] + (p2[0]-p1[0])/3.5);
-    			coords[1][1] = (int) (p2[1] + (p2[1]-p1[1])/3.5);
-    			coords[1][2] = (int) (z+EXHEIGHT_H*1.8);
-    			coords[2][0] = p2[0];// - (p2[0]-p1[0])/15;
-    			coords[2][1] = p2[1];// - (p2[1]-p1[1])/15;
-    			coords[2][2] = (int) (z+EXHEIGHT_H*1.8);
-    			coords[3][0] = p2[0];
-    			coords[3][1] = p2[1];
-    			coords[3][2] = (int) z;
-    			coords[4][0] = (int) (p2[0] - (p2[0]-p1[0])/4.5);
-    			coords[4][1] = (int) (p2[1] - (p2[1]-p1[1])/4.5);
-    			coords[4][2] = (int) (z+ EXHEIGHT_H*8);
-    			coords[5][0] = (int) (p2[0] - (p2[0]-p1[0])/4.5);
-    			coords[5][1] = (int) (p2[1] - (p2[1]-p1[1])/4.5);
-    			coords[5][2] = (int) (z+EXHEIGHT_H *4);
-    			coords[6] = coords[0];
+				coords.get(0).setXYZ(p2[0] - (p2[0]-p1[0])/2 , p2[1] - (p2[1]-p1[1])/2,(int) (z+EXHEIGHT_H*4));
+				coords.get(1).setXYZ((int) (p2[0] + (p2[0]-p1[0])/3.5) ,(int) (p2[1] + (p2[1]-p1[1])/3.5),(int) (z+EXHEIGHT_H*1.8));
+				coords.get(2).setXYZ(p2[0] ,p2[1],(int) (z+EXHEIGHT_H*1.8));
+				coords.get(3).setXYZ(p2[0] ,p2[1],(int) z);
+				coords.get(4).setXYZ((int) (p2[0] - (p2[0]-p1[0])/4.5) ,(int) (p2[1] - (p2[1]-p1[1])/4.5),(int) (z+ EXHEIGHT_H*8));
+				coords.get(5).setXYZ((int) (p2[0] - (p2[0]-p1[0])/4.5) ,(int) (p2[1] - (p2[1]-p1[1])/4.5),(int) (z+EXHEIGHT_H *4));
+				coords.get(6).setXYZ(coords.get(0));
     			break;
     		}
+			coordsMap.coords=coords;
     	}
 
-    	return Arrays.asList(coords);
+    	return coordsMap;
     }
 }
 

@@ -67,69 +67,68 @@ public class Board extends JPanel implements ActionListener {
     private int dptLeft;   // death pause ticks remaining; used to provide a pause when player dies.
     private int superzapperTicksLeft = 0;  // if this is > 0, we're currently in a superzap
     private boolean crawlerSpiked;
-    private List<List<int[]>> stars;
+    private List<GameObjectCoordsMap> stars;
 
 	Font stdfnt, bigfnt;
 
     public Board() {
-    	addKeyListener(new TAdapter());
-    	setFocusable(true);
-    	setBackground(Color.BLACK);
-    	setDoubleBuffered(true);
+		addKeyListener(new TAdapter());
+		setFocusable(true);
+		setBackground(Color.BLACK);
+		setDoubleBuffered(true);
 
-    	try {
-        	InputStream fntStr = this.getClass().getClassLoader().getResourceAsStream("lt.ttf");
-    		GraphicsEnvironment ge = 
-    				GraphicsEnvironment.getLocalGraphicsEnvironment();
-    		ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, fntStr));
-    		fntStr.close();
-        	stdfnt = new Font("Lowtech", Font.BOLD, 20);
-        	bigfnt = new Font("Lowtech", Font.BOLD, 50);
-    	} catch (Exception e) {
-    		// just use helvetica
-        	stdfnt = new Font("Helvetica", Font.BOLD, 20);
-        	stdfnt = new Font("Helvetica", Font.BOLD, 50);
-    	}
+		try {
+			InputStream fntStr = this.getClass().getClassLoader().getResourceAsStream("lt.ttf");
+			GraphicsEnvironment ge =
+					GraphicsEnvironment.getLocalGraphicsEnvironment();
+			ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, fntStr));
+			fntStr.close();
+			stdfnt = new Font("Lowtech", Font.BOLD, 20);
+			bigfnt = new Font("Lowtech", Font.BOLD, 50);
+		} catch (Exception e) {
+			// just use helvetica
+			stdfnt = new Font("Helvetica", Font.BOLD, 20);
+			stdfnt = new Font("Helvetica", Font.BOLD, 50);
+		}
 
-        exes = new ArrayList<Ex>();
-        enemymissiles = new ArrayList<Missile>();
-        spikes = new ArrayList<Spike>();
-        stars = new ArrayList<List<int[]>>();
-        for (int i=0; i< NUM_STARS; i++){
-        	// this is awkward, but we'd like to use the existing plotting method, which expects a 
-        	// List for each thing to be drawn -- in this case, a point.
-        	int[] starcoords = new int[3];
-        	starcoords[0] = r.nextInt(B_WIDTH);
-        	starcoords[1] = r.nextInt(B_HEIGHT);
-        	starcoords[2] = -r.nextInt(LEVEL_DEPTH);
-        	List<int[]> starcoordlist = new ArrayList<int[]>();
-        	starcoordlist.add(starcoords);
-        	starcoordlist.add(starcoords);
-        	stars.add(starcoordlist);
-        }
+		exes = new ArrayList<Ex>();
+		enemymissiles = new ArrayList<Missile>();
+		spikes = new ArrayList<Spike>();
+		stars = new ArrayList<GameObjectCoordsMap>();
+		for (int i=0; i< NUM_STARS; i++){
+			// this is awkward, but we'd like to use the existing plotting method, which expects a
+			// List for each thing to be drawn -- in this case, a point.
+			GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(2);
+			ArrayList<Coord> coords = coordsMap.coords;
+			coords.get(0).setXYZ(r.nextInt(B_WIDTH),r.nextInt(B_HEIGHT),-r.nextInt(LEVEL_DEPTH));
+			coords.get(1).setXYZ(coords.get(0));
 
-        setSize(B_WIDTH, B_HEIGHT);
+			coordsMap.coords=coords;
+			stars.add(coordsMap);
+		}
 
-        FileReader f = null;
-        try { // this is the sort of shit that made me question java.
-        	f = new FileReader("wbt.hi");
-        	BufferedReader br = new BufferedReader(f);
-        	hiscore = Integer.parseInt(br.readLine());;
-      		f.close();
-        }
-        catch (Exception e)
-        { // if we can't read the high score file...oh well.
-        }
-        
-        // force soundmanager singleton to initialize
-        SoundManager.get();
+		setSize(B_WIDTH, B_HEIGHT);
 
-        startGame();
+		FileReader f = null;
+		try { // this is the sort of shit that made me question java.
+			f = new FileReader("wbt.hi");
+			BufferedReader br = new BufferedReader(f);
+			hiscore = Integer.parseInt(br.readLine());;
+			f.close();
+		}
+		catch (Exception e)
+		{ // if we can't read the high score file...oh well.
+		}
 
-        // start our ghetto timer loop
-        timer = new Timer(15, this);  // appx 60fps
-        timer.start();
-    }
+		// force soundmanager singleton to initialize
+		SoundManager.get();
+
+		startGame();
+
+		// start our ghetto timer loop
+		timer = new Timer(15, this);  // appx 60fps
+		timer.start();
+	}
     
     /**
      * Initialize the game.
@@ -256,10 +255,9 @@ public class Board extends JPanel implements ActionListener {
      * draw the inpassed object; inpassed coords are 3D.
      * @param g2d
      * @param color
-     * @param coords
      */
-    private void drawObject(Graphics2D g2d, Color color, List<int[]> coords){
-    	drawObject(g2d, color, coords, 0);
+    private void drawObject(Graphics2D g2d, Color color, GameObjectCoordsMap object){
+    	drawObject(g2d, color, object, 0);
     }
     
     /**
@@ -271,19 +269,18 @@ public class Board extends JPanel implements ActionListener {
      *  
      * @param g2d - the graphics control object
      * @param color - which color to use to render the object.
-     * @param coords
      * @param zoffset
      */
-    private void drawObject(Graphics2D g2d, Color color, List<int[]> coords, int zoffset){
+    private void drawObject(Graphics2D g2d, Color color, GameObjectCoordsMap object, int zoffset){
     	int oldx = 0, oldy=0;
         g2d.setColor(color);
+
+        ArrayList<Coord> coords = object.coords;
     	for (int i=0; i<coords.size(); i++)
     	{
-    		int x=coords.get(i)[0];
-    		int y=coords.get(i)[1];
-    		int z=coords.get(i)[2];
-    		int[] eff_coords = renderFromZ(x, y, z-boardpov+zoffset);
-    		
+    		Coord coord = coords.get(i);
+    		int[] eff_coords = renderFromZ(coord.getX(), coord.getY(), coord.getZ()-boardpov+zoffset);
+
     		if (i > 0) {
     			g2d.drawLine(oldx, oldy, eff_coords[0], eff_coords[1]);
     		}
@@ -309,40 +306,40 @@ public class Board extends JPanel implements ActionListener {
     	}
         g2d.setColor(boardColor);
     	for (int i=0; i<colCoords.size(); i++)
-    	{
-    		int[] ftCoords = renderFromZ(colCoords.get(i)[0], colCoords.get(i)[1], 0-boardpov);
-    		int x=ftCoords[0];
-    		int y=ftCoords[1];
-    		int[] backCoords = renderFromZ(colCoords.get(i)[0], colCoords.get(i)[1], z-boardpov);
-    		int backx = backCoords[0];
-    		int backy = backCoords[1];
-    		if (i > 0) {
-    			g2d.drawLine(oldx, oldy, x, y);
-  			    g2d.drawLine(oldbackx, oldbacky, backx, backy);
-    			if (i == playerCol || i == playerCol+1){
-    		        g2d.setColor(Color.YELLOW);
-    			}
-    			if (i < colCoords.size()-1 || i==playerCol+1 || !levelinfo.isContinuous())
-        			g2d.drawLine(x,  y, backx, backy);
-    			if (i == playerCol || i == playerCol + 1){
-        	        g2d.setColor(boardColor);
-    			}
-    		}
-    		else {
-    			if (i == playerCol || i == playerCol+1){
-    		        g2d.setColor(Color.YELLOW);
-    			}
-    			g2d.drawLine(x,  y, backx, backy);
-    			if (i == playerCol || i == playerCol + 1){
-        	        g2d.setColor(boardColor);
-    			}
-    		}
-    		oldx=x;
-    		oldy=y;
-    		oldbackx=backx;
-    		oldbacky=backy;
-    	}
-    }
+	{
+		int[] ftCoords = renderFromZ(colCoords.get(i)[0], colCoords.get(i)[1], 0-boardpov);
+		int x=ftCoords[0];
+		int y=ftCoords[1];
+		int[] backCoords = renderFromZ(colCoords.get(i)[0], colCoords.get(i)[1], z-boardpov);
+		int backx = backCoords[0];
+		int backy = backCoords[1];
+		if (i > 0) {
+			g2d.drawLine(oldx, oldy, x, y);
+			g2d.drawLine(oldbackx, oldbacky, backx, backy);
+			if (i == playerCol || i == playerCol+1){
+				g2d.setColor(Color.YELLOW);
+			}
+			if (i < colCoords.size()-1 || i==playerCol+1 || !levelinfo.isContinuous())
+				g2d.drawLine(x,  y, backx, backy);
+			if (i == playerCol || i == playerCol + 1){
+				g2d.setColor(boardColor);
+			}
+		}
+		else {
+			if (i == playerCol || i == playerCol+1){
+				g2d.setColor(Color.YELLOW);
+			}
+			g2d.drawLine(x,  y, backx, backy);
+			if (i == playerCol || i == playerCol + 1){
+				g2d.setColor(boardColor);
+			}
+		}
+		oldx=x;
+		oldy=y;
+		oldbackx=backx;
+		oldbacky=backy;
+	}
+}
 
     /**
      * draw centered text at inpassed y.
@@ -389,7 +386,7 @@ public class Board extends JPanel implements ActionListener {
     		
     		if (boardpov < -Crawler.CHEIGHT) {
     			// pov shows game level board in the distance; add stars for fun
-    			for (List<int[]> s : stars) {
+    			for (GameObjectCoordsMap s : stars) {
     				Color c = new Color(r.nextInt(255),r.nextInt(255),r.nextInt(255));
     				drawObject(g2d, c, s);
     			}
@@ -428,12 +425,12 @@ public class Board extends JPanel implements ActionListener {
     		// draw spikes and spinnythings
     		for (Spike s : spikes) {
     			if (s.isVisible()) {
-    				List<int[]> spikeCoords = s.getCoords(levelinfo);
+					GameObjectCoordsMap spikeCoords = s.getCoords(levelinfo);
     				drawObject(g2d, Color.GREEN, spikeCoords);
-    				spikeCoords.set(0, spikeCoords.get(1)); // add white dot at end
+    				spikeCoords.coords.set(0, spikeCoords.coords.get(1)); // add white dot at end
     				drawObject(g2d, Color.WHITE, spikeCoords);
     				if (s.isSpinnerVisible()) {
-        				List<int[]> spinCoords = s.getSpinnerCoords(levelinfo);
+						GameObjectCoordsMap spinCoords = s.getSpinnerCoords(levelinfo);
         				drawObject(g2d, Color.GREEN, spinCoords);
     				}
     			}

@@ -1,5 +1,6 @@
 package wbtempest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,26 +53,19 @@ public class Missile {
 	 * @param lev
 	 * @return
 	 */
-	public List<int[]> getCoords(Level lev){
-		int[][] coords = new int[5][3];
+	public GameObjectCoordsMap getCoords(Level lev){
+		GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(5);
+		ArrayList<Coord> coords = coordsMap.coords;
 		Column c = lev.getColumns().get(colnum);
 		int[] p1 = c.getFrontPoint1();
 		int[] p2 = c.getFrontPoint2();
-		coords[0][0] = p1[0]+(p2[0] - p1[0])*2/5;
-		coords[0][1] = p1[1]+(p2[1] - p1[1])*2/5;
-		coords[0][2] = zpos-HEIGHT_H;
-		coords[1][0] = p1[0]+(p2[0] - p1[0])/2;
-		coords[1][1] = p1[1]+(p2[1] - p1[1])/2;
-		coords[1][2] = zpos-HEIGHT;
-		coords[2][0] = p1[0]+(p2[0] - p1[0])*3/5;
-		coords[2][1] = p1[1]+(p2[1] - p1[1])*3/5;
-		coords[2][2] = zpos-HEIGHT_H;
-		coords[3][0] = p1[0]+(p2[0] - p1[0])/2;
-		coords[3][1] = p1[1]+(p2[1] - p1[1])/2;
-		coords[3][2] = zpos;
-		coords[4] = coords[0];
-		
-		return Arrays.asList(coords);
+		coords.get(0).setXYZ(p1[0]+(p2[0] - p1[0])*2/5,p1[1]+(p2[1] - p1[1])*2/5,zpos-HEIGHT_H);
+		coords.get(1).setXYZ(p1[0]+(p2[0] - p1[0])/2,p1[1]+(p2[1] - p1[1])/2,zpos-HEIGHT);
+		coords.get(2).setXYZ(p1[0]+(p2[0] - p1[0])*3/5,p1[1]+(p2[1] - p1[1])*3/5,zpos-HEIGHT_H);
+		coords.get(3).setXYZ(p1[0]+(p2[0] - p1[0])/2,p1[1]+(p2[1] - p1[1])/2,zpos);
+		coords.get(4).setXYZ(coords.get(0));
+		coordsMap.coords=coords;
+		return coordsMap;
 	}
 
 	/**
@@ -80,26 +74,19 @@ public class Missile {
 	 * @param lev
 	 * @return
 	 */
-	public List<int[]> getLayerCoords(Level lev){
-		int[][] coords = new int[5][3];
+	public GameObjectCoordsMap getLayerCoords(Level lev){
+		GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(5);
+		ArrayList<Coord> coords = coordsMap.coords;
 		Column c = lev.getColumns().get(colnum);
 		int[] p1 = c.getFrontPoint1();
 		int[] p2 = c.getFrontPoint2();
-		coords[0][0] = p1[0]+(p2[0] - p1[0])*9/20;
-		coords[0][1] = p1[1]+(p2[1] - p1[1])*9/20;
-		coords[0][2] = zpos-HEIGHT_H;
-		coords[1][0] = p1[0]+(p2[0] - p1[0])/2;
-		coords[1][1] = p1[1]+(p2[1] - p1[1])/2;
-		coords[1][2] = zpos-HEIGHT*3/5;
-		coords[2][0] = p1[0]+(p2[0] - p1[0])*11/20;
-		coords[2][1] = p1[1]+(p2[1] - p1[1])*11/20;
-		coords[2][2] = zpos-HEIGHT_H;
-		coords[3][0] = p1[0]+(p2[0] - p1[0])/2;
-		coords[3][1] = p1[1]+(p2[1] - p1[1])/2;
-		coords[3][2] = zpos-HEIGHT*2/5;
-		coords[4] = coords[0];
-		
-		return Arrays.asList(coords);
+		coords.get(0).setXYZ(p1[0]+(p2[0] - p1[0])*9/20,p1[1]+(p2[1] - p1[1])*9/20,zpos-HEIGHT_H);
+		coords.get(1).setXYZ(p1[0]+(p2[0] - p1[0])/2,p1[1]+(p2[1] - p1[1])/2,zpos-HEIGHT*3/5);
+		coords.get(2).setXYZ(p1[0]+(p2[0] - p1[0])*11/20,p1[1]+(p2[1] - p1[1])*11/20,zpos-HEIGHT_H);
+		coords.get(3).setXYZ(p1[0]+(p2[0] - p1[0])/2,p1[1]+(p2[1] - p1[1])/2,zpos-HEIGHT*2/5);
+		coords.get(4).setXYZ(coords.get(0));
+		coordsMap.coords=coords;
+		return coordsMap;
 	}
 
 	public void setVisible(boolean b) {

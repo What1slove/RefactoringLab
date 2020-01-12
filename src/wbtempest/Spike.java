@@ -1,5 +1,6 @@
 package wbtempest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -86,9 +87,10 @@ public class Spike {
 			visible = false;
 	}
 	
-	public List<int[]> getSpinnerCoords(Level lev){
+	public GameObjectCoordsMap getSpinnerCoords(Level lev){
 		int nCoords = 16;
-		int[][] coords=new int[nCoords][3];
+		GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(nCoords);
+		ArrayList<Coord> coords = coordsMap.coords;
 		Column c = lev.getColumns().get(colnum);
 		int[] p1 = c.getFrontPoint1();
 		int[] p2 = c.getFrontPoint2();
@@ -103,26 +105,24 @@ public class Spike {
 		int ct = 0;
 		for (double rads=spinnerangle; ct < nCoords; rads+=step, ct++)
 		{
-			coords[ct][0] = mp[0] - (int)(Math.sin(rads) * radius * .85);
-			coords[ct][1] = mp[1] - (int)(Math.cos(rads) * radius);
-			coords[ct][2] = spinnerz;
+			coords.get(ct).setXYZ(mp[0] - (int)(Math.sin(rads) * radius * .85),mp[1] - (int)(Math.cos(rads) * radius),spinnerz);
 			radius = origRadius *ct/nCoords; 
 		}
-    	return Arrays.asList(coords);
+		coordsMap.coords=coords;
+		return coordsMap;
 	}
 
-	public List<int[]> getCoords(Level lev){
-		int[][] coords=new int[2][3];
+	public GameObjectCoordsMap getCoords(Level lev){
+		GameObjectCoordsMap coordsMap = new GameObjectCoordsMap(2);
+		ArrayList<Coord> coords = coordsMap.coords;
 		Column c = lev.getColumns().get(colnum);
 		int[] p1 = c.getFrontPoint1();
 		int[] p2 = c.getFrontPoint2();
-		coords[0][0]=p1[0] + (p2[0] - p1[0])/2;
-		coords[0][1]=p1[1] + (p2[1] - p1[1])/2;
-		coords[0][2]=Board.LEVEL_DEPTH;
-		coords[1][0]=coords[0][0];
-		coords[1][1]=coords[0][1];
-		coords[1][2]=Board.LEVEL_DEPTH - length;
-    	return Arrays.asList(coords);
+		coords.get(0).setXYZ(p1[0] + (p2[0] - p1[0])/2,p1[1] + (p2[1] - p1[1])/2,Board.LEVEL_DEPTH);
+		coords.get(1).setXYZ(coords.get(0));
+		coords.get(1).setZ(Board.LEVEL_DEPTH - length);
+		coordsMap.coords=coords;
+		return coordsMap;
 	}
 	
 	
